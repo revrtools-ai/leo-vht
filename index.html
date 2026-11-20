@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Léo VHT · Photographe & vidéaste</title>
+<meta name="description" content="Portfolio de Léo VHT, photographe et vidéaste basé à Paris : sport, événements, portraits, marques.">
+<meta name="theme-color" content="#0c0c0b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>
+  // Thème choisi (ou celui du système) appliqué avant l'affichage, sans flash
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem("theme"); } catch (e) {}
+    if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    document.documentElement.dataset.theme = t;
+  })();
+</script>
+</head>
+<body class="v-home">
+
+<header class="bar">
+  <a class="bar-name" href="#/">Léo <em>VHT</em></a>
+  <p class="bar-role mono">Photographe &amp; vidéaste — Paris</p>
+  <nav class="bar-nav mono" aria-label="Navigation">
+    <a href="#/" data-v="home">Planche</a>
+    <a href="#/index" data-v="index">Index</a>
+    <a href="#/contact" data-v="contact">Contact</a>
+    <button class="theme" type="button" id="theme" aria-label="Passer en mode clair"><i></i><span>Clair</span></button>
+  </nav>
+</header>
+
+<!-- Accueil : planche contact infinie -->
+<div class="stage" id="stage" aria-label="Planche de photos à explorer"></div>
+<!-- Deux calques identiques : le nom s'inverse sur les photos, le métier reste en bandeau plein -->
+<div class="hero hero-name" aria-hidden="true">
+  <h1><span>Léo</span> <em>VHT</em></h1>
+  <p class="hero-role"><b>Photographe <em>&amp;</em> vidéaste</b></p>
+  <p class="mono hero-city">Basé à Paris — disponible partout</p>
+  <p class="mono hero-hint">Glisser pour explorer · Cliquer pour ouvrir</p>
+</div>
+<div class="hero hero-tag" aria-hidden="true">
+  <h1><span>Léo</span> <em>VHT</em></h1>
+  <p class="hero-role"><b>Photographe <em>&amp;</em> vidéaste</b></p>
+  <p class="mono hero-city">Basé à Paris — disponible partout</p>
+  <p class="mono hero-hint">Glisser pour explorer · Cliquer pour ouvrir</p>
+</div>
+<div class="hud">
+  <p class="mono rec" id="coords">X 0000 · Y 0000</p>
+  <a class="mono hud-cta" href="#/contact">Un projet&nbsp;? Écrivez-moi <span>→</span></a>
+</div>
+<div class="cap" id="cap"><b></b><span class="mono"></span></div>
+
+<!-- Index, projet, contact -->
+<section class="view" id="view" aria-live="polite"></section>
+
+<!-- Visionneuse -->
+<div class="lb" id="lb" hidden>
+  <img alt="">
+  <p class="mono lb-count"></p>
+  <button class="mono lb-close" type="button">Fermer ✕</button>
+  <button class="lb-prev" type="button" aria-label="Photo précédente">←</button>
+  <button class="lb-next" type="button" aria-label="Photo suivante">→</button>
+</div>
+
+<script src="data.js"></script>
+<script src="images.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
