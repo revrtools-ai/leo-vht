@@ -12,6 +12,40 @@ window.SITE = {
 
 window.CATEGORIES = ["Événementiel", "Portrait", "Sport", "Marque", "Lieux & food"];
 
+// ——— Page d'accueil (la planche) ———
+// Les photos qui s'affichent sur l'accueil. Pas besoin d'un dossier à part : il suffit de les lister ici.
+// Un nom = une photo du dossier img, sans « -s » ni « .webp » (psg-01 = img/psg-01.webp).
+// Une ligne par projet ; le site les mélange tout seul et les répète sur la planche infinie.
+// Un clic sur une photo ouvre son projet. Liste vide [] = 3 photos par projet, choisies automatiquement.
+window.ACCUEIL = [
+  "psg-01", "psg-05", "psg-08",
+  "cannes-01", "cannes-06", "cannes-10",
+  "vitality-03", "vitality-01", "vitality-05",
+  "zerance-03", "zerance-01", "zerance-06",
+  "irmao-02", "irmao-01", "irmao-05",
+  "leroy-merlin-01", "leroy-merlin-06", "leroy-merlin-10",
+  "ratp-05", "ratp-01", "ratp-06",
+  "kimpembe-02", "kimpembe-03", "kimpembe-04",
+  "rohan-chabot-02", "rohan-chabot-01", "rohan-chabot-04",
+  "bilal-01", "bilal-04", "bilal-06",
+  "bnp-06", "bnp-01", "bnp-05",
+  "veolia-02", "veolia-01", "veolia-05",
+  "new3dge-01", "new3dge-05", "new3dge-07",
+  "wine-tasting-04", "wine-tasting-01", "wine-tasting-05",
+  "chez-simone-03", "chez-simone-01", "chez-simone-07",
+  "apb-01", "apb-05", "apb-07",
+];
+
+// ——— Vidéos (onglet « Vidéos » de la page Projets) ———
+// video  : lien YouTube ou Vimeo (le plus simple), ou fichier MP4 posé dans site/video/ (ex. "video/ratp.mp4")
+// poster : image d'aperçu, ex. "img/ratp-03.webp" (facultatif pour YouTube : prise automatiquement)
+// format : "vertical" pour une vidéo 9:16 (reel, TikTok), sinon horizontale 16:9
+// Exemple à copier sous la ligne « window.VIDEOS = [ » en enlevant les // :
+//   { title: "Aftermovie RATP", client: "Centre bus", cat: "Marque", type: "Film corporate", year: "2025",
+//     video: "https://vimeo.com/123456789", poster: "img/ratp-01.webp" },
+window.VIDEOS = [
+];
+
 // images : nombre de photos dans site/img (<slug>-01.webp, -02…)
 // cover : photo de couverture · tile : vignette de la grille (recadrée en 3:2) · pos : cadrage de la vignette
 window.PROJECTS = [

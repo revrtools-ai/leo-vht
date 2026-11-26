@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=2">
 <script>
   // Thème choisi (ou celui du système) appliqué avant l'affichage, sans flash
   (function () {
@@ -27,13 +27,16 @@
   <p class="bar-role mono">Photographe &amp; vidéaste — Paris</p>
   <nav class="bar-nav mono" aria-label="Navigation">
     <a href="#/" data-v="home">Planche</a>
-    <a href="#/index" data-v="index">Index</a>
+    <a href="#/projets" data-v="projets">Projets</a>
     <a href="#/contact" data-v="contact">Contact</a>
     <button class="theme" type="button" id="theme" aria-label="Passer en mode clair"><i></i><span>Clair</span></button>
   </nav>
 </header>
 
-<!-- Accueil : planche contact infinie -->
+<!-- Accueil : fond de photos floues (lent), puis planche contact infinie -->
+<div class="haze-wrap" aria-hidden="true"><div class="haze" id="haze"></div></div>
+<!-- Groupe isolé : le nom et les repères s'inversent sur les photos, pas sur le fond flou -->
+<main class="home">
 <div class="stage" id="stage" aria-label="Planche de photos à explorer"></div>
 <!-- Deux calques identiques : le nom s'inverse sur les photos, le métier reste en bandeau plein -->
 <div class="hero hero-name" aria-hidden="true">
@@ -53,8 +56,9 @@
   <a class="mono hud-cta" href="#/contact">Un projet&nbsp;? Écrivez-moi <span>→</span></a>
 </div>
 <div class="cap" id="cap"><b></b><span class="mono"></span></div>
+</main>
 
-<!-- Index, projet, contact -->
+<!-- Projets, projet, contact -->
 <section class="view" id="view" aria-live="polite"></section>
 
 <!-- Visionneuse -->
@@ -66,8 +70,15 @@
   <button class="lb-next" type="button" aria-label="Photo suivante">→</button>
 </div>
 
-<script src="data.js"></script>
-<script src="images.js"></script>
-<script src="main.js"></script>
+<!-- Lecteur vidéo -->
+<div class="vp" id="vp" hidden>
+  <div class="vp-box"></div>
+  <p class="mono vp-title"></p>
+  <button class="mono lb-close vp-close" type="button">Fermer ✕</button>
+</div>
+
+<script src="data.js?v=2"></script>
+<script src="images.js?v=2"></script>
+<script src="main.js?v=2"></script>
 </body>
 </html>
