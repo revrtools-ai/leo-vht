@@ -203,6 +203,7 @@ body:not(.v-home) .hero, body:not(.v-home) .hud { opacity: 0; }
 .fade { opacity: 0; animation: rise .55s var(--ease) forwards; animation-delay: calc(var(--d, 0) * 35ms); transform: translateY(10px); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .ix-tools .chips { min-height: 32px; }   /* le bouton Photos / Vidéos ne saute pas d'un onglet à l'autre */
+@media (max-width: 899px) { .ix-tools .chips:empty { display: none; } }   /* mobile : pas de place vide quand il n'y a pas de filtres */
 .chip { padding: 7px 12px 6px; border: 1px solid var(--line); border-radius: 99px; color: var(--mute); transition: color .2s, background .2s, border-color .2s; }
 .chip:hover { color: var(--ink); border-color: var(--mute); }
 .chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
