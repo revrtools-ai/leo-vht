@@ -265,6 +265,202 @@
   };
   const posterOf = (v) => v.poster || (vidOf(v.video).kind === "yt" ? `https://i.ytimg.com/vi/${vidOf(v.video).id}/hqdefault.jpg` : "");
 
+  /* Vidéos : banc de montage (moniteur, fiche du film, timeline) */
+  // Tant qu'aucune vidéo n'est listée dans data.js : la mise en page avec des photos de projets, marquée « Aperçu »
+  const DEMO = ["psg", "leroy-merlin", "vitality", "cannes", "ratp", "chez-simone"].filter((s) => bySlug[s]).map((s) => {
+    const p = bySlug[s];
+    return { title: p.title, client: p.client, cat: p.cat, type: p.type, year: p.year, poster: src(nm(s, p.cover), true), strip: src(nm(s, p.cover)), demo: true };
+  });
+  const secs = (d) => (/^\d+(:\d{1,2})*$/.test(String(d || "").trim()) ? String(d).trim().split(":").reduce((a, b) => a * 60 + +b, 0) : 0);
+  const tc = (s) => [s / 3600, (s / 60) % 60, s % 60].map((v) => pad(Math.floor(v))).join(":") + ":" + pad(Math.floor((s % 1) * 25));
+  // Piste son décorative (forme d'onde fixe pour chaque film)
+  const wave = (k) => {
+    const R = rng(k * 97 + 13);
+    let d = "";
+    for (let x = 0; x < 140; x++) {
+      const a = 0.12 + 0.88 * Math.pow(R(), 1.7) * (0.55 + 0.45 * Math.sin(x / 9 + k * 2));
+      d += `M${x + 0.5} ${(10 - a * 9).toFixed(1)}V${(10 + a * 9).toFixed(1)}`;
+    }
+    return `<svg viewBox="0 0 140 20" preserveAspectRatio="none"><path d="${d}"/></svg>`;
+  };
+
+  function bench(body, first) {
+    const real = V.length > 0;
+    const list = (real ? V : DEMO).filter((v) => filter === "Tout" || v.cat === filter);
+    const n = list.length;
+    if (!n) { body.innerHTML = ""; return () => {}; }
+    const w = list.map((v) => secs(v.duree) || 60);   // longueur dans la timeline : racine de la durée, pour qu'un film court reste visible
+    const known = list.every((v) => secs(v.duree));
+    const total = w.reduce((a, b) => a + b, 0);
+    const r = (i) => (first ? `rise" style="--d:${i + 3}` : `fade" style="--d:${i}`);
+    body.innerHTML = `
+      <div class="bm">
+        <div class="bm-top">
+          <div class="bm-mon ${r(0)}">
+            <button class="bm-scr${real ? "" : " demo"}" type="button">
+              <span class="bm-ly"></span><span class="bm-ly"></span>
+              <span class="bm-vf" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b></span>
+              <span class="mono bm-o bm-o1" aria-hidden="true"><i></i>${real ? "Lecture" : "Aperçu"}</span>
+              <span class="mono bm-o bm-o2" aria-hidden="true">00:00:00:00</span>
+              <span class="mono bm-o bm-o3" aria-hidden="true"></span>
+              <span class="mono bm-o bm-o4" aria-hidden="true"></span>
+              ${real ? `<span class="mono bm-go" aria-hidden="true">▶ Lire le film</span>` : ""}
+            </button>
+          </div>
+          <div class="bm-info ${r(1)}">
+            ${real ? "" : `<p class="mono bm-demo">Aperçu de la mise en page · les films arrivent bientôt</p>`}
+            <p class="mono bm-k"></p>
+            <h3 class="bm-t"></h3>
+            <p class="mono bm-c"></p>
+            <dl class="mono bm-dl"></dl>
+            <div class="bm-act">
+              ${real ? `<button class="mono bm-play" type="button">▶ Lire le film</button>` : `<a class="mono bm-play ghost" href="#/contact">Un projet vidéo&nbsp;? Écrivez-moi →</a>`}
+              <span class="bm-nav">
+                <button class="mono" type="button" data-d="-1" aria-label="Film précédent">←</button>
+                <button class="mono" type="button" data-d="1" aria-label="Film suivant">→</button>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="bm-tl ${r(2)}">
+          <p class="mono bm-hd"><span>Séquence · ${pad(n)} film${n > 1 ? "s" : ""}</span><span>${known ? `Durée ${tc(total).slice(0, 8)}` : "V1 · A1"}</span></p>
+          <div class="bm-scroll">
+            <div class="bm-track" style="--n:${n}">
+              <div class="bm-ruler" aria-hidden="true"></div>
+              <div class="bm-v">${list.map((v, k) => `
+                <button class="bm-clip" type="button" data-k="${k}" style="flex:${Math.sqrt(w[k]).toFixed(2)} 1 0" aria-label="${esc(v.title)}">
+                  <span class="bm-strip${v.format === "vertical" ? " vert" : ""}" style="background-image:url('${esc(v.strip || posterOf(v))}')"></span>
+                  <span class="mono bm-lab">${pad(k + 1)}&nbsp; ${esc(v.title)}</span>
+                </button>`).join("")}
+              </div>
+              <div class="bm-a" aria-hidden="true">${list.map((v, k) => `<span style="flex:${Math.sqrt(w[k]).toFixed(2)} 1 0">${wave(k)}</span>`).join("")}</div>
+              <div class="bm-head" aria-hidden="true"><i></i></div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    const scr = $(".bm-scr", body), lys = $$(".bm-ly", body), head = $(".bm-head", body);
+    const track = $(".bm-track", body), scroller = $(".bm-scroll", body), clips = $$(".bm-clip", body);
+    const info = $(".bm-info", body), tcEl = $(".bm-o2", body);
+    const DUR = 7000;                       // temps passé sur chaque film quand la timeline défile seule
+    const B = { k: -1, p: 0, last: performance.now(), scrub: false, cur: 0, tok: 0, raf: 0, user: 0 };
+    let geo = [];
+    const measure = () => { geo = clips.map((c) => [c.offsetLeft, c.offsetWidth]); };
+
+    function select(k, p = 0, auto = false) {
+      k = mod(k, n);
+      B.p = p;
+      if (k === B.k) return;
+      B.k = k;
+      const v = list[k];
+      clips.forEach((c, j) => c.classList.toggle("on", j === k));
+      // Moniteur : deux calques en fondu enchaîné
+      const next = lys[B.cur === 0 ? 1 : 0], prev = lys[B.cur];
+      B.cur = lys.indexOf(next);
+      const tok = String(++B.tok);
+      const vert = v.format === "vertical", poster = posterOf(v), d = vidOf(v.video || "");
+      next.className = `bm-ly${vert ? " vert" : ""}`;
+      next.dataset.tok = tok;
+      next.innerHTML = (vert && poster ? `<img class="bm-bg" src="${esc(poster)}" alt="">` : "")
+        + (d.kind === "file" && v.video
+          ? `<video class="bm-m" src="${esc(v.video)}" ${poster ? `poster="${esc(poster)}"` : ""} muted loop playsinline autoplay preload="auto"></video>`
+          : `<img class="bm-m" src="${esc(poster)}" alt="" style="object-position:${v.pos || "50% 50%"}">`);
+      const media = $(".bm-m", next);
+      const reveal = () => {
+        if (next.dataset.tok !== tok) return;
+        void next.offsetWidth;
+        next.classList.add("on");
+        prev.classList.remove("on");
+        prev.classList.add("was");
+        const old = prev.dataset.tok;
+        setTimeout(() => { if (prev.dataset.tok === old && !prev.classList.contains("on")) { prev.innerHTML = ""; prev.className = "bm-ly"; } }, 1000);
+      };
+      if (media.tagName === "IMG" && media.decode) media.decode().catch(() => {}).then(reveal); else reveal();
+      // Fiche du film
+      const vf = vert ? "9:16 · vertical" : "16:9";
+      $(".bm-o3", body).textContent = vf.slice(0, 4);
+      $(".bm-o4", body).textContent = `${pad(k + 1)} / ${pad(n)}`;
+      $(".bm-k", body).textContent = `${pad(k + 1)} / ${pad(n)} — ${[v.cat, v.year].filter(Boolean).join(" · ")}`;
+      $(".bm-t", body).textContent = v.title;
+      $(".bm-c", body).textContent = v.client || "";
+      $(".bm-dl", body).innerHTML = [["Type", v.type], ["Format", vf], ["Durée", v.duree]].map(([a, b]) => `<dt>${a}</dt><dd>${esc(b || "—")}</dd>`).join("");
+      scr.setAttribute("aria-label", real ? `Lire « ${v.title} »` : `Aperçu : ${v.title}`);
+      info.classList.remove("in"); void info.offsetWidth; info.classList.add("in");
+      // Sur mobile, la timeline défile pour garder le film en vue (sauf si on vient d'y toucher)
+      if (auto && scroller.scrollWidth > scroller.clientWidth + 4 && performance.now() - B.user > 4000) {
+        const [l, cw] = geo[k] || [0, 0];
+        if (l < scroller.scrollLeft || l + cw > scroller.scrollLeft + scroller.clientWidth) scroller.scrollTo({ left: l - 16, behavior: "smooth" });
+      }
+    }
+    const play = () => { if (real) openVideo(list[B.k]); };
+    const go = (d) => select(B.k + d);
+
+    const loop = (now) => {
+      const dt = Math.min(now - B.last, 100);
+      B.last = now;
+      if (!B.scrub && !reduce && !document.hidden && vp.hidden) {
+        B.p += dt / DUR;
+        if (B.p >= 1) select(B.k + 1, 0, true);
+      }
+      const [l, cw] = geo[B.k] || [0, 0];
+      head.style.transform = `translate3d(${(l + B.p * cw).toFixed(1)}px,0,0)`;
+      tcEl.textContent = tc(B.p * (known ? w[B.k] : DUR / 1000));
+      B.raf = requestAnimationFrame(loop);
+    };
+
+    // Souris : la tête de lecture suit le curseur sur la timeline ; clic = lire le film
+    const scrub = (e) => {
+      if (e.pointerType !== "mouse") return;
+      const x = e.clientX - track.getBoundingClientRect().left;
+      let k = geo.findIndex(([l, cw]) => x >= l && x < l + cw + 2);
+      if (k < 0) k = x < 0 ? 0 : n - 1;
+      const [l, cw] = geo[k];
+      B.scrub = true;
+      select(k, clamp((x - l) / cw, 0, 0.999));
+      const vid = $(".bm-ly.on video", body);
+      if (vid && vid.duration) vid.currentTime = B.p * vid.duration;
+    };
+    track.addEventListener("pointermove", scrub);
+    track.addEventListener("pointerleave", () => { B.scrub = false; });
+    track.addEventListener("click", (e) => {
+      const c = e.target.closest(".bm-clip");
+      if (!c) return;
+      const k = +c.dataset.k;
+      if (k === B.k && real) play(); else select(k, 0);
+    });
+    ["pointerdown", "wheel", "touchstart"].forEach((t) => scroller.addEventListener(t, () => { B.user = performance.now(); }, { passive: true }));
+    scr.addEventListener("click", (e) => { if (swiped) { swiped = false; e.preventDefault(); return; } play(); });
+    // Doigt : glisser sur le moniteur pour changer de film
+    let sx0 = null, swiped = false;
+    scr.addEventListener("pointerdown", (e) => { sx0 = e.pointerType === "mouse" ? null : e.clientX; swiped = false; });
+    scr.addEventListener("pointerup", (e) => {
+      if (sx0 === null) return;
+      const d = e.clientX - sx0; sx0 = null;
+      if (Math.abs(d) > 40) { swiped = true; go(d < 0 ? 1 : -1); }
+    });
+    const pb = $("button.bm-play", body);
+    if (pb) pb.addEventListener("click", play);
+    $(".bm-nav", body).addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) go(+b.dataset.d); });
+    const key = (e) => {
+      if (!lb.hidden || !vp.hidden) return;
+      if (e.key === "ArrowRight") go(1);
+      if (e.key === "ArrowLeft") go(-1);
+    };
+    addEventListener("keydown", key);
+    const ro = new ResizeObserver(measure);
+    ro.observe(track);
+    measure();
+    select(0);
+    B.raf = requestAnimationFrame(loop);
+    return () => {
+      cancelAnimationFrame(B.raf);
+      removeEventListener("keydown", key);
+      ro.disconnect();
+      $$("video", body).forEach((v) => v.pause());
+    };
+  }
+
   /* Projets : photos ou vidéos */
   function renderProjets() {
     view.innerHTML = `
@@ -284,8 +480,10 @@
       </div>
       <div class="ix-float"><img alt=""></div>`;
     const sw = $(".switch", view), chips = $(".chips", view), body = $(".ix-body", view);
+    let bmStop = () => {};
 
     const fill = (first) => {
+      bmStop(); bmStop = () => {};
       const items = mode === "videos" ? V : P;
       sw.dataset.m = mode;
       $$("a", sw).forEach((a) => { const on = a.dataset.m === mode; a.classList.toggle("on", on); a.setAttribute("aria-selected", on); });
@@ -295,21 +493,13 @@
       const count = (c) => (c === "Tout" ? items.length : items.filter((p) => p.cat === c).length);
       chips.innerHTML = items.length > 1 ? cats.map((c) => `<button class="chip mono${c === filter ? " on" : ""}" data-c="${esc(c)}">${esc(c)} <span>${count(c)}</span></button>`).join("") : "";
       const rise = (i) => (first ? `rise" style="--d:${Math.min(i, 10) + 3}` : `fade" style="--d:${Math.min(i, 10)}`);
-      if (mode === "videos" && !V.length) {
-        body.innerHTML = `
-          <div class="ix-empty ${rise(0)}">
-            <p class="ix-empty-t">Les vidéos arrivent <em>bientôt.</em></p>
-            <a class="pj-contact mono" href="#/contact">Un projet vidéo&nbsp;? Écrivez-moi →</a>
-          </div>`;
-        return;
-      }
+      if (mode === "videos") { bmStop = bench(body, first); return; }
       body.innerHTML = `<ol class="ix-list">${items.map((p, i) => {
-        const vid = mode === "videos";
-        const thumb = vid ? posterOf(p) : src(nm(p.slug, p.tile));
+        const thumb = src(nm(p.slug, p.tile));
         return `
           <li class="ix-li ${rise(i)}" data-cat="${esc(p.cat || "")}">
-            <a class="ix-row" href="${vid ? esc(p.video) : `#/p/${p.slug}`}" ${vid ? `data-v="${i}"` : `data-slug="${p.slug}"`}>
-              <span class="ix-n mono">${vid ? "▶ " : ""}${pad(i + 1)}</span>
+            <a class="ix-row" href="#/p/${p.slug}" data-slug="${p.slug}">
+              <span class="ix-n mono">${pad(i + 1)}</span>
               <span class="ix-t">${esc(p.title)}</span>
               <span class="ix-meta mono">${esc(p.cat || p.type || "")}${p.year ? ` · ${esc(p.year)}` : ""}</span>
               <span class="ix-c mono">${esc(p.client || "")}</span>
@@ -341,13 +531,7 @@
       if (!b) return;
       filter = b.dataset.c;
       $$(".chip", view).forEach((c) => c.classList.toggle("on", c === b));
-      apply();
-    });
-    body.addEventListener("click", (e) => {
-      const row = e.target.closest(".ix-row[data-v]");
-      if (!row) return;
-      e.preventDefault();
-      openVideo(V[+row.dataset.v]);
+      if (mode === "videos") { bmStop(); bmStop = bench(body, false); } else apply();
     });
 
     // Aperçu qui suit le curseur : les photos du projet défilent, ou l'image de la vidéo
@@ -369,17 +553,11 @@
       if (!row || row === cur || !mouse.matches) return;
       cur = row;
       clearInterval(timer);
-      if (row.dataset.v) {
-        const poster = posterOf(V[+row.dataset.v]);
-        if (!poster) { fl.classList.remove("on"); return; }
-        fi.src = poster;
-      } else {
-        const p = bySlug[row.dataset.slug];
-        const seq = [p.tile, ...Array.from({ length: p.images }, (_, k) => k + 1).filter((k) => k !== p.tile && !SKIP.has(nm(p.slug, k)))];
-        let k = 0;
-        fi.src = src(nm(p.slug, seq[0]));
-        timer = setInterval(() => { k = (k + 1) % seq.length; fi.src = src(nm(p.slug, seq[k])); }, 700);
-      }
+      const p = bySlug[row.dataset.slug];
+      const seq = [p.tile, ...Array.from({ length: p.images }, (_, k) => k + 1).filter((k) => k !== p.tile && !SKIP.has(nm(p.slug, k)))];
+      let k = 0;
+      fi.src = src(nm(p.slug, seq[0]));
+      timer = setInterval(() => { k = (k + 1) % seq.length; fi.src = src(nm(p.slug, seq[k])); }, 700);
       if (!fl.classList.contains("on")) { x = tx; y = ty; }
       fl.classList.add("on");
     };
@@ -393,7 +571,7 @@
     view.addEventListener("pointerout", leave);
     follow();
     cleanup = () => {
-      cancelAnimationFrame(raf); clearInterval(timer);
+      cancelAnimationFrame(raf); clearInterval(timer); bmStop();
       view.removeEventListener("pointermove", mv);
       view.removeEventListener("pointerover", enter);
       view.removeEventListener("pointerout", leave);

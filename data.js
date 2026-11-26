@@ -40,9 +40,12 @@ window.ACCUEIL = [
 // video  : lien YouTube ou Vimeo (le plus simple), ou fichier MP4 posé dans site/video/ (ex. "video/ratp.mp4")
 // poster : image d'aperçu, ex. "img/ratp-03.webp" (facultatif pour YouTube : prise automatiquement)
 // format : "vertical" pour une vidéo 9:16 (reel, TikTok), sinon horizontale 16:9
+// duree  : facultatif, ex. "1:45" — affichée sur la fiche et donne la longueur du film dans la timeline
+// La page Vidéos est un banc de montage : moniteur, fiche du film, timeline. Tant que la liste est vide,
+// elle montre la mise en page avec des photos de projets, marquée « Aperçu ».
 // Exemple à copier sous la ligne « window.VIDEOS = [ » en enlevant les // :
 //   { title: "Aftermovie RATP", client: "Centre bus", cat: "Marque", type: "Film corporate", year: "2025",
-//     video: "https://vimeo.com/123456789", poster: "img/ratp-01.webp" },
+//     video: "https://vimeo.com/123456789", poster: "img/ratp-01.webp", duree: "1:45" },
 window.VIDEOS = [
 ];
 
